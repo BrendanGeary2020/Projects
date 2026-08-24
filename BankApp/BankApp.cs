@@ -117,7 +117,7 @@ class BankApp
         string input = Console.ReadLine();
 
         // Example:
-        // Billy BillyBankAccount
+        // Billy - BillyBankAccount digitalSnail12345
 
         string[] usernamePassword = input.Split(' ');
 
@@ -675,7 +675,6 @@ class BankApp
 
 
 // User - Abstract Parent class for Customer and Admin
-
 class User
 {
     public string Username { get; set; }
@@ -690,7 +689,6 @@ class User
 
 
 // Customer
-
 class Customer : User
 {
     public int Id { get; set; }
@@ -732,7 +730,6 @@ class Admin : User
 
 
 // Account - abstract clasee for CheckingAccount and Savings Account
-
 abstract class Account
 {
     public int Id { get; set; }
@@ -743,24 +740,24 @@ abstract class Account
 
 
 // Checking Account
-
 class CheckingAccount : Account
 {
     public string AccountType { get; set; } = "CheckingAccount";
 
-    public override double AddInterest()
-    {
-        // Add 2% to current balance
+    // no interest for checking accounts, but if needed can uncomment bellow code and remove the admin call taht blocks adding
+    // interest to checking accounts
+    // public override double AddInterest()
+    // {
+    //     // Add 2% to current balance
 
-        Balance = Balance + (Balance * 0.02);
+    //     Balance = Balance + (Balance * 0.02);
 
-        return Balance;
-    }
+    //     return Balance;
+    // }
 }
 
 
 // Savings Account
-
 class SavingsAccount : Account
 {
     public string AccountType { get; set; } = "SavingsAccount";
