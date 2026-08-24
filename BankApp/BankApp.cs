@@ -389,7 +389,8 @@ class BankApp
             Console.WriteLine("1. See all customers");
             Console.WriteLine("2. See all accounts");
             Console.WriteLine("3. Add account");
-            Console.WriteLine("4. Add interest to savings account");
+            //Console.WriteLine("4. Add interest to savings account"); // comment out if interest should show for all accounts types
+            Console.WriteLine("4. Add interest to account"); // comment out if interest should only show for savings accounts
             Console.WriteLine("5. Delete any account");
             Console.WriteLine("6. Logout");
             Console.Write("Please select an option: ");
@@ -548,8 +549,13 @@ class BankApp
                     Console.WriteLine("Account ID: " + newAccount.Id);
                     break;
                 case "4":
+                    // only have start message be for for all account types or just savings accounts, Commentout one of the two
+
                     // Add interest to a Savings Account
-                    Console.WriteLine("\nAdd Interest to Savings Account");
+                    //Console.WriteLine("\nAdd Interest to Savings Account");
+
+                    //Message incase both account types are preferred to recieve interest
+                    Console.WriteLine("\nAdd Interest to Account");
 
                     Console.Write("Enter Account ID: ");
 
@@ -587,7 +593,10 @@ class BankApp
                     {
                         Console.WriteLine("Account not found.");
                     }
-                    else if (interestAccount is SavingsAccount)
+                    // comment out or portion of if both account types is preferred to receive interest
+                    // for example,
+                    // else if (interestAccount is SavingsAccount) // || interestAccount is CheckingAccount)
+                    else if (interestAccount is SavingsAccount || interestAccount is CheckingAccount)
                     {
                         double oldBalance = interestAccount.Balance;
 
@@ -607,6 +616,7 @@ class BankApp
                             "Interest can only be added to Checking Accounts!"
                         );
                     }
+                    
 
                     break;
                 case "5":
@@ -744,16 +754,16 @@ class CheckingAccount : Account
 {
     public string AccountType { get; set; } = "CheckingAccount";
 
-    // no interest for checking accounts, but if needed can uncomment bellow code and remove the admin call taht blocks adding
+    // interest for checking accounts, but if not needed/desired can uncomment bellow code and readd the admin call that blocks adding
     // interest to checking accounts
-    // public override double AddInterest()
-    // {
-    //     // Add 2% to current balance
+    public override double AddInterest()
+    {
+        // Add 2% to current balance
 
-    //     Balance = Balance + (Balance * 0.02);
+        Balance = Balance + (Balance * 0.02);
 
-    //     return Balance;
-    // }
+        return Balance;
+    }
 }
 
 
