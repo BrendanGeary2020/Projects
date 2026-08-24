@@ -411,8 +411,8 @@ class BankApp
 
         bool running = true;
 
-        // Account ID counter
-        int accountID = 1;
+        // Account ID counter // account 1-4 already made examples
+        int accountID = 5;
 
         while (running)
         {
@@ -420,11 +420,12 @@ class BankApp
             Console.WriteLine("Admin Menu");
             Console.WriteLine("1. See all customers");
             Console.WriteLine("2. See all accounts");
-            Console.WriteLine("3. Add account");
-            //Console.WriteLine("4. Add interest to savings account"); // comment out if interest should show for all accounts types
-            Console.WriteLine("4. Add interest to account"); // comment out if interest should only show for savings accounts
-            Console.WriteLine("5. Delete any account");
-            Console.WriteLine("6. Logout");
+            Console.WriteLine("3. See all accounts with a balance of more than $100");
+            Console.WriteLine("4. Add account");
+            //Console.WriteLine("5. Add interest to savings account"); // comment out if interest should show for all accounts types
+            Console.WriteLine("5. Add interest to account"); // comment out if interest should only show for savings accounts
+            Console.WriteLine("6. Delete any account");
+            Console.WriteLine("7. Logout");
             Console.Write("Please select an option: ");
 
             string choice = Console.ReadLine();
@@ -443,6 +444,7 @@ class BankApp
                     break;
 
                 case "2":
+                {
                     // See all accounts
                     Console.WriteLine();
                     Console.WriteLine("All Accounts:");
@@ -480,9 +482,65 @@ class BankApp
                     {
                         Console.WriteLine("There are no accounts.");
                     }
+
                     break;
+                }
 
                 case "3":
+                {
+                    // See all accounts where the account balance is at or above $1,000
+                    Console.WriteLine();
+                    Console.WriteLine("All Accounts with balance of $1,000 or more:");
+
+                    bool accountsExist = false;
+                    bool qualifyingAccountsExist = false;
+
+                    foreach (Customer customer in customers)
+                    {
+                        foreach (Account account in customer.Accounts)
+                        {
+                            accountsExist = true;
+
+                            if (account.Balance <= 100)
+                            {
+                                continue;
+                            }
+
+                            qualifyingAccountsExist = true;
+
+                            string accountType = "";
+
+                            if (account is CheckingAccount)
+                            {
+                                accountType = "Checking Account";
+                            }
+                            else if (account is SavingsAccount)
+                            {
+                                accountType = "Savings Account";
+                            }
+
+                            Console.WriteLine(
+                                "Account ID: " + account.Id +
+                                " | Customer: " + customer.Name +
+                                " | Username: " + customer.Username +
+                                " | Type: " + accountType +
+                                " | Balance: $" + account.Balance
+                            );
+                        }
+                    }
+
+                    if (!accountsExist)
+                    {
+                        Console.WriteLine("There are no accounts.");
+                    }
+                    else if (!qualifyingAccountsExist)
+                    {
+                        Console.WriteLine("There are no accounts with a balance of $1,000 or more.");
+                    }
+
+                    break;
+                }
+                case "4":
                     // Add account
                     Console.WriteLine();
                     Console.WriteLine("Add Account");
@@ -580,7 +638,7 @@ class BankApp
                     Console.WriteLine("Account successfully added.");
                     Console.WriteLine("Account ID: " + newAccount.Id);
                     break;
-                case "4":
+                case "5":
                     // only have start message be for for all account types or just savings accounts, Commentout one of the two
 
                     // Add interest to a Savings Account
@@ -651,7 +709,7 @@ class BankApp
                     
 
                     break;
-                case "5":
+                case "6":
                     // Delete any account
                     Console.WriteLine();
                     Console.WriteLine("Delete Account");
@@ -702,7 +760,7 @@ class BankApp
 
                     break;
 
-                case "6":
+                case "7":
                     Console.WriteLine("Logging out...");
                     Console.WriteLine("Have a good day, and thank you for choosing Digital Bank!\n");
                     running = false;
