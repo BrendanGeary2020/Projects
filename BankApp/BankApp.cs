@@ -107,44 +107,75 @@ class BankApp
     static void Welcome()
     {
         Console.WriteLine();
-        Console.WriteLine("Welcome to your Digital Bank!");
+        Console.WriteLine("Welcome to Digital Bank!");
     }
 
-    static string Login()
+   static string Login()
     {
-        Console.WriteLine("Please enter your username, then enter a space, then enter your password:");
-
-        string input = Console.ReadLine();
-
-        // Example:
-        // Billy - BillyBankAccount digitalSnail12345
-
-        string[] usernamePassword = input.Split(' ');
-
-        string username = usernamePassword[0];
-        string password = usernamePassword[1];
-
-        // Admin login
-        foreach (Admin admin in admins)
+        Console.WriteLine();
+        Console.WriteLine(
+            "Please enter your username, then enter a space, then enter your password:"
+        );
+        while (true)
         {
-            if (admin.Username == username &&
-                admin.Password == password)
-            {
-                return "admin";
-            }
-        }
+            string input = Console.ReadLine();
 
-        // Customer login
-        foreach (User user in users)
-        {
-            if (user.Username == username &&
-                user.Password == password)
+            // Allow user to quit
+            if (input.Equals("quit", StringComparison.OrdinalIgnoreCase) ||
+                input.Equals("exit", StringComparison.OrdinalIgnoreCase))
             {
-                return user.Username;
+                Console.WriteLine("Have a good day, and thank you for choosing Digital Bank!\n");
+                Environment.Exit(0);
             }
-        }
 
-        return "validation_failed";
+            // Split the input by spaces
+            string[] usernamePassword = input.Split(
+                ' ',
+                StringSplitOptions.RemoveEmptyEntries
+            );
+
+            // Must have exactly 2 entries:
+            // username + password
+            if (usernamePassword.Length != 2)
+            {
+                Console.WriteLine(
+                    "\nValidation failed! Please try again or Type 'quit' or 'exit' to close the application."
+                );
+                Console.WriteLine(
+                    "Please enter your username, then enter a space, then enter your password:"
+                );
+
+                continue;
+            }
+
+            string username = usernamePassword[0];
+            string password = usernamePassword[1];
+
+            // Admin login
+            foreach (Admin admin in admins)
+            {
+                if (admin.Username == username &&
+                    admin.Password == password)
+                {
+                    return "admin";
+                }
+            }
+
+            // Customer login
+            foreach (User user in users)
+            {
+                if (user.Username == username &&
+                    user.Password == password)
+                {
+                    return user.Username;
+                }
+            }
+
+            // Username/password did not match
+            Console.WriteLine(
+                "Validation failed. Please try again."
+            );
+        }
     }
 
     static void CustomerDashboard(string loginResult)
@@ -362,6 +393,7 @@ class BankApp
                 
                 case "4":
                     Console.WriteLine("Logging out...");
+                    Console.WriteLine("Have a good day, and thank you for choosing Digital Bank!\n");
                     running = false;
                     break;
 
@@ -672,6 +704,7 @@ class BankApp
 
                 case "6":
                     Console.WriteLine("Logging out...");
+                    Console.WriteLine("Have a good day, and thank you for choosing Digital Bank!\n");
                     running = false;
                     break;
 
