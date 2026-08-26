@@ -66,14 +66,13 @@ def update_existing_admin(
         updated_admin
     )
 
-    if result.matched_count == 0:
+    if result is None:
         raise HTTPException(
             status_code=404,
             detail="Admin not found"
         )
 
     return updated_admin
-
 
 # DELETE - Delete admin
 @router.delete("/{admin_id}")

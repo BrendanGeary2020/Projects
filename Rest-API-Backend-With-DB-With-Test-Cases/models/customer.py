@@ -1,9 +1,5 @@
-from pydantic import BaseModel
+from models.user import User
 
 
-class Customer(BaseModel):
-    id: int
-    name: str
-    email: str
-    department: str
-    salary: float
+class Customer(User):
+    username: str

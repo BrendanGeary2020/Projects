@@ -1,13 +1,16 @@
 from fastapi import APIRouter, HTTPException
 
 from models.customer import Customer
-
 from services.customer_service import (
     get_customers,
     get_customer,
     create_customer,
     update_customer,
     delete_customer
+)
+
+from services.account_service import (
+    get_customer_accounts
 )
 
 
@@ -17,22 +20,13 @@ router = APIRouter(
 )
 
 
-# GET - Get all customers / filter / search
 @router.get("/")
-def get_all_customers(
-    department: str | None = None,
-    search: str | None = None
-):
-
-    return get_customers(
-        department,
-        search
-    )
+def read_customers():
+    return get_customers()
 
 
-# GET - Get one customer
 @router.get("/{customer_id}")
-def get_one_customer(customer_id: int):
+def read_customer(customer_id: int):
 
     customer = get_customer(customer_id)
 
@@ -45,47 +39,10 @@ def get_one_customer(customer_id: int):
     return customer
 
 
-# POST - Create customer
-@router.post("/", status_code=201)
-def create_new_customer(customer: Customer):
+@router.get("/{customer_id}/accounts")
+def read_customer_accounts(customer_id: int):
 
-    existing_customer = get_customer(customer.id)
-
-    if existing_customer:
-        raise HTTPException(
-            status_code=400,
-            detail="Customer ID already exists"
-        )
-
-    return create_customer(customer)
-
-
-# PUT - Update customer
-@router.put("/{customer_id}")
-def update_existing_customer(
-    customer_id: int,
-    updated_customer: Customer
-):
-
-    result = update_customer(
-        customer_id,
-        updated_customer
-    )
-
-    if result.matched_count == 0:
-        raise HTTPException(
-            status_code=404,
-            detail="Customer not found"
-        )
-
-    return updated_customer
-
-
-# DELETE - Delete customer
-@router.delete("/{customer_id}")
-def delete_existing_customer(customer_id: int):
-
-    customer = delete_customer(customer_id)
+    customer = get_customer(customer_id)
 
     if not customer:
         raise HTTPException(
@@ -93,4 +50,52 @@ def delete_existing_customer(customer_id: int):
             detail="Customer not found"
         )
 
-    return customer
+    return get_customer_accounts(customer_id)
+
+
+@router.post("/", status_code=201)
+def add_customer(customer: Customer):
+
+    result = create_customer(customer)
+
+    if not result:
+        raise HTTPException(
+            status_code=400,
+            detail="Customer ID already exists"
+        )
+
+    return result
+
+
+@router.put("/{customer_id}")
+def edit_customer(
+    customer_id: int,
+    customer: Customer
+):
+
+    result = update_customer(
+        customer_id,
+        customer
+    )
+
+    if not result:
+        raise HTTPException(
+            status_code=404,
+            detail="Customer not found"
+        )
+
+    return result
+
+
+@router.delete("/{customer_id}")
+def remove_customer(customer_id: int):
+
+    result = delete_customer(customer_id)
+
+    if not result:
+        raise HTTPException(
+            status_code=404,
+            detail="Customer not found"
+        )
+
+    return result

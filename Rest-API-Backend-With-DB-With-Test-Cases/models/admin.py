@@ -1,7 +1,5 @@
-from pydantic import BaseModel
+from models.user import User
 
 
-class Admin(BaseModel):
-    id: int
-    name: str
-    email: str
+class Admin(User):
+    username: str

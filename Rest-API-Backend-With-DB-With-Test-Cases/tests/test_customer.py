@@ -11,27 +11,48 @@ def test_get_customers():
     response = client.get("/customers/")
 
     assert response.status_code == 200
-    
+
+
 def test_get_customer():
 
-    response = client.get("/customers/1")
+    customer = {
+        "id": 900001,
+        "name": "Get Test Customer",
+        "email": "getcustomer@example.com",
+        "username": "getcustomer"
+    }
+
+    create_response = client.post(
+        "/customers/",
+        json=customer
+    )
+
+    assert create_response.status_code == 201
+
+    response = client.get("/customers/900001")
 
     assert response.status_code == 200
+    assert response.json()["id"] == 900001
+
+    delete_response = client.delete("/customers/900001")
+
+    assert delete_response.status_code == 200
+
 
 def test_get_customer_not_found():
 
-    response = client.get("/customers/99999")
+    response = client.get("/customers/999999")
 
     assert response.status_code == 404
+
 
 def test_create_customer():
 
     new_customer = {
-        "id": 999,
+        "id": 900002,
         "name": "Test Customer",
         "email": "testcustomer@example.com",
-        "department": "IT",
-        "salary": 50000
+        "username": "testcustomer"
     }
 
     response = client.post(
@@ -41,19 +62,24 @@ def test_create_customer():
 
     assert response.status_code == 201
 
-    # Clean up test data
-    delete_response = client.delete("/customers/999")
+    assert response.json()["id"] == 900002
+    assert response.json()["name"] == "Test Customer"
+    assert response.json()["email"] == "testcustomer@example.com"
+    assert response.json()["username"] == "testcustomer"
+
+    # Clean up
+    delete_response = client.delete("/customers/900002")
 
     assert delete_response.status_code == 200
+
 
 def test_update_customer():
 
     new_customer = {
-        "id": 1000,
+        "id": 900003,
         "name": "Update Test Customer",
         "email": "updatecustomer@example.com",
-        "department": "IT",
-        "salary": 50000
+        "username": "updatecustomer"
     }
 
     # Create test customer
@@ -66,15 +92,14 @@ def test_update_customer():
 
     # Update customer
     updated_customer = {
-        "id": 1000,
+        "id": 900003,
         "name": "Updated Customer",
         "email": "updatedcustomer@example.com",
-        "department": "HR",
-        "salary": 60000
+        "username": "updatedcustomer"
     }
 
     update_response = client.put(
-        "/customers/1000",
+        "/customers/900003",
         json=updated_customer
     )
 
@@ -82,22 +107,22 @@ def test_update_customer():
 
     # Verify updated values
     assert update_response.json()["name"] == "Updated Customer"
-    assert update_response.json()["department"] == "HR"
-    assert update_response.json()["salary"] == 60000
+    assert update_response.json()["email"] == "updatedcustomer@example.com"
+    assert update_response.json()["username"] == "updatedcustomer"
 
     # Clean up
-    delete_response = client.delete("/customers/1000")
+    delete_response = client.delete("/customers/900003")
 
     assert delete_response.status_code == 200
+
 
 def test_delete_customer():
 
     new_customer = {
-        "id": 1001,
+        "id": 900004,
         "name": "Delete Test Customer",
         "email": "deletecustomer@example.com",
-        "department": "IT",
-        "salary": 50000
+        "username": "deletecustomer"
     }
 
     # Create test customer
@@ -109,145 +134,66 @@ def test_delete_customer():
     assert create_response.status_code == 201
 
     # Delete customer
-    delete_response = client.delete("/customers/1001")
+    delete_response = client.delete("/customers/900004")
 
     assert delete_response.status_code == 200
 
     # Verify customer no longer exists
-    get_response = client.get("/customers/1001")
+    get_response = client.get("/customers/900004")
 
     assert get_response.status_code == 404
 
-def test_customer_department_filter():
+
+def test_create_duplicate_customer():
 
     new_customer = {
-        "id": 1002,
-        "name": "Filter Test Customer",
-        "email": "filter@example.com",
-        "department": "IT",
-        "salary": 50000
+        "id": 900005,
+        "name": "Duplicate Test Customer",
+        "email": "duplicate@example.com",
+        "username": "duplicatecustomer"
     }
 
-    # Create test customer
-    create_response = client.post(
+    # Create first customer
+    first_response = client.post(
         "/customers/",
         json=new_customer
     )
 
-    assert create_response.status_code == 201
+    assert first_response.status_code == 201
 
-    # Search using lowercase "it"
-    response = client.get(
-        "/customers/?department=it"
-    )
-
-    assert response.status_code == 200
-
-    customers = response.json()
-
-    assert any(
-        customer["id"] == 1002
-        for customer in customers
-    )
-
-    # Clean up
-    delete_response = client.delete("/customers/1002")
-
-    assert delete_response.status_code == 200
-
-def test_customer_name_search():
-
-    new_customer = {
-        "id": 1003,
-        "name": "Search Test Customer",
-        "email": "search@example.com",
-        "department": "IT",
-        "salary": 50000
-    }
-
-    # Create test customer
-    create_response = client.post(
+    # Try to create the same customer again
+    second_response = client.post(
         "/customers/",
         json=new_customer
     )
 
-    assert create_response.status_code == 201
-
-    # Search using lowercase "search"
-    response = client.get(
-        "/customers/?search=search"
-    )
-
-    assert response.status_code == 200
-
-    customers = response.json()
-
-    assert any(
-        customer["id"] == 1003
-        for customer in customers
-    )
+    assert second_response.status_code == 400
 
     # Clean up
-    delete_response = client.delete("/customers/1003")
+    delete_response = client.delete("/customers/900005")
 
     assert delete_response.status_code == 200
 
-def test_customer_department_and_search():
-
-    new_customer = {
-        "id": 1004,
-        "name": "John Filter Customer",
-        "email": "johnfilter@example.com",
-        "department": "IT",
-        "salary": 55000
-    }
-
-    # Create test customer
-    create_response = client.post(
-        "/customers/",
-        json=new_customer
-    )
-
-    assert create_response.status_code == 201
-
-    # Filter by department and search by name
-    response = client.get(
-        "/customers/?department=it&search=john"
-    )
-
-    assert response.status_code == 200
-
-    customers = response.json()
-
-    assert any(
-        customer["id"] == 1004
-        for customer in customers
-    )
-
-    # Clean up
-    delete_response = client.delete("/customers/1004")
-
-    assert delete_response.status_code == 200
 
 def test_update_customer_not_found():
 
     updated_customer = {
-        "id": 9998,
+        "id": 999998,
         "name": "Does Not Exist",
         "email": "notfound@example.com",
-        "department": "IT",
-        "salary": 50000
+        "username": "notfound"
     }
 
     response = client.put(
-        "/customers/9998",
+        "/customers/999998",
         json=updated_customer
     )
 
     assert response.status_code == 404
 
+
 def test_delete_customer_not_found():
 
-    response = client.delete("/customers/9998")
+    response = client.delete("/customers/999999")
 
     assert response.status_code == 404

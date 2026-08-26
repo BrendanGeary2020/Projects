@@ -1,48 +1,40 @@
-from database.mongodb import customers_collection
-from models.customer import Customer
+from database.mongodb import users_collection, accounts_collection
 
 
-def get_customers(
-    department: str | None = None,
-    search: str | None = None
-):
-
-    query = {}
-
-    # Filter by department
-    if department:
-        query["department"] = {
-            "$regex": f"^{department}$",
-            "$options": "i"
-        }
-
-    # Search by customer name
-    if search:
-        query["name"] = {
-            "$regex": search,
-            "$options": "i"
-        }
-
+def get_customers():
     return list(
-        customers_collection.find(
-            query,
+        users_collection.find(
+            {"user_type": "customer"},
             {"_id": 0}
         )
     )
 
 
 def get_customer(customer_id: int):
-
-    return customers_collection.find_one(
-        {"id": customer_id},
+    return users_collection.find_one(
+        {
+            "id": customer_id,
+            "user_type": "customer"
+        },
         {"_id": 0}
     )
 
 
-def create_customer(customer: Customer):
+def create_customer(customer):
 
-    customers_collection.insert_one(
-        customer.model_dump()
+    existing_user = users_collection.find_one(
+        {"id": customer.id}
+    )
+
+    if existing_user:
+        return None
+
+    customer_data = customer.model_dump()
+
+    customer_data["user_type"] = "customer"
+
+    users_collection.insert_one(
+        customer_data
     )
 
     return customer
@@ -50,27 +42,48 @@ def create_customer(customer: Customer):
 
 def update_customer(
     customer_id: int,
-    updated_customer: Customer
+    updated_customer
 ):
 
-    result = customers_collection.update_one(
-        {"id": customer_id},
-        {"$set": updated_customer.model_dump()}
+    existing_customer = get_customer(customer_id)
+
+    if not existing_customer:
+        return None
+
+    updated_data = updated_customer.model_dump()
+
+    updated_data["user_type"] = "customer"
+
+    users_collection.update_one(
+        {
+            "id": customer_id,
+            "user_type": "customer"
+        },
+        {
+            "$set": updated_data
+        }
     )
 
-    return result
+    return updated_customer
 
 
 def delete_customer(customer_id: int):
 
-    customer = customers_collection.find_one(
-        {"id": customer_id},
-        {"_id": 0}
+    customer = get_customer(customer_id)
+
+    if not customer:
+        return None
+
+    users_collection.delete_one(
+        {
+            "id": customer_id,
+            "user_type": "customer"
+        }
     )
 
-    if customer:
-        customers_collection.delete_one(
-            {"id": customer_id}
-        )
+    # Delete customer's accounts as well.
+    accounts_collection.delete_many(
+        {"customer_id": customer_id}
+    )
 
     return customer
